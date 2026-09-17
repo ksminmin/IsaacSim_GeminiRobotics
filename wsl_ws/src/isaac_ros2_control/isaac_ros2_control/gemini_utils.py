@@ -1,4 +1,5 @@
-"""Utilities for image encoding, Gemini response parsing, and 2D-to-3D projection."""
+"""Utilities for image encoding, Gemini response parsing, block name resolution,
+and 2D-to-3D projection."""
 import numpy as np
 import json
 import re
@@ -39,6 +40,58 @@ def parse_gemini_response(response_text):
     text = re.sub(r'^```(?:json)?\s*', '', text)
     text = re.sub(r'\s*```$', '', text)
     return json.loads(text)
+
+
+# Blocks are published to TF as 'Block1'..'Block9', but Gemini usually refers to
+# them by the spawn color defined in isaacsim_scripts/three_robot_tower.py.
+NUM_BLOCKS = 9
+
+_BLOCK_COLORS = {
+    'red': 1,
+    'green': 2,
+    'blue': 3,
+    'yellow': 4,
+    'magenta': 5,
+    'cyan': 6,
+    'orange': 7,
+    'purple': 8,
+    'lime': 9,
+}
+
+
+def resolve_block_key(label):
+    """Resolve a free-form block reference to its canonical TF frame name.
+
+    Gemini may name a block by index ('Block1', 'block_1', 'Block 1', '1') or by
+    its color ('Red Cube', 'the purple cylinder'). Both are mapped to the
+    'BlockN' frame published by the simulation.
+
+    Args:
+        label: Free-form block reference produced by Gemini.
+
+    Returns:
+        str: Canonical block key, e.g. 'Block1', or None if unresolvable.
+    """
+    if not isinstance(label, str):
+        return None
+    text = label.strip().lower()
+    if not text:
+        return None
+
+    # Explicit index: 'Block1', 'block_1', 'block 1', 'block-1'
+    match = re.search(r'block[\s_\-#]*(\d+)', text)
+    if match is None:
+        # Bare index: '1', '#3'
+        match = re.fullmatch(r'#?\s*(\d+)', text)
+    if match is not None:
+        index = int(match.group(1))
+        return f'Block{index}' if 1 <= index <= NUM_BLOCKS else None
+
+    # Fall back to the block color (e.g. 'Red Cube' -> 'Block1')
+    for color, index in _BLOCK_COLORS.items():
+        if re.search(r'\b' + color + r'\b', text):
+            return f'Block{index}'
+    return None
 
 
 def normalized_2d_to_pixel(y_norm, x_norm, img_height, img_width):

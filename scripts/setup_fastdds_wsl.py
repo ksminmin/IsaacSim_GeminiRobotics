@@ -44,7 +44,7 @@ def main():
         <participant profile_name="unicast_connection" is_default_profile="true">
             <rtps>
                 <builtin>
-                    <avoid_builtin_multicast>true</avoid_builtin_multicast>
+                    <avoid_builtin_multicast>false</avoid_builtin_multicast>
                     <metatrafficUnicastLocatorList>
                         <locator/>
                     </metatrafficUnicastLocatorList>
@@ -57,6 +57,19 @@ def main():
                         <locator>
                             <udpv4>
                                 <address>{wsl_ip}</address>
+                            </udpv4>
+                        </locator>
+                        <!-- Loopback: without it, nodes on the same host cannot find each other,
+                             because defining initialPeersList replaces the default multicast locator. -->
+                        <locator>
+                            <udpv4>
+                                <address>127.0.0.1</address>
+                            </udpv4>
+                        </locator>
+                        <!-- Default DDS discovery multicast, restored for reliable local discovery -->
+                        <locator>
+                            <udpv4>
+                                <address>239.255.0.1</address>
                             </udpv4>
                         </locator>
                     </initialPeersList>

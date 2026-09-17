@@ -122,7 +122,7 @@ ok "rosdep initialized"
 log "=== Phase 3.7: Installing Robotics Packages ==="
 
 # Source ROS 2 for any post-install checks
-source /opt/ros/jazzy/setup.bash
+set +u; source /opt/ros/jazzy/setup.bash; set -u  # ROS setup.bash는 미설정 변수를 참조하므로 set -u를 잠시 해제
 
 # --- Manipulation ---
 log "Installing MoveIt 2 (motion planning framework)..."
@@ -243,7 +243,7 @@ ok "Default workspace created at ~/ros2_ws/"
 ###############################################################################
 log "=== Phase 3.10: Verifying ROS 2 Installation ==="
 
-source /opt/ros/jazzy/setup.bash
+set +u; source /opt/ros/jazzy/setup.bash; set -u  # 동일
 
 ROS_DISTRO_CHECK=$(printenv ROS_DISTRO 2>/dev/null || echo "not set")
 if [ "$ROS_DISTRO_CHECK" = "jazzy" ]; then

@@ -6,6 +6,11 @@ const express = require('express');
 const cors = require('cors');
 const { spawn } = require('child_process');
 
+/* ── WSL2 environment (override via env vars) ─────────────── */
+const WSL_DISTRO = process.env.WSL_DISTRO || 'Ubuntu-24.04';
+const WSL_WS = process.env.WSL_WS || '/home/min/catkin_ws';
+const ROS_SETUP = process.env.ROS_SETUP || '/opt/ros/jazzy/setup.bash';
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -47,7 +52,7 @@ app.get('/api/status', (_req, res) => {
 /* ── Build ────────────────────────────────────────────────── */
 app.post('/api/build', (_req, res) => {
   appendLog('[GUI] Triggering colcon build in WSL2...');
-  const buildProc = spawn('wsl', ['-d', 'Ubuntu-24.04', 'bash', '-c', 'cd /home/isaac/catkin_ws && source /opt/ros/jazzy/setup.bash && colcon build']);
+  const buildProc = spawn('wsl', ['-d', WSL_DISTRO, 'bash', '-c', `cd ${WSL_WS} && source ${ROS_SETUP} && colcon build`]);
   buildProc.stdout.on('data', d => appendLog(d.toString()));
   buildProc.stderr.on('data', d => appendLog(d.toString()));
   buildProc.on('close', code => {
@@ -64,12 +69,12 @@ app.post('/api/start', (_req, res) => {
 
   logBuffer = [];
   appendLog('[GUI] Cleaning up old processes before start...');
-  const pkill = require('child_process').spawnSync('wsl', ['-d', 'Ubuntu-24.04', 'bash', '-c', 'pkill -f gemini_controller; pkill -f rosbridge; pkill -f multi_robot; pkill -f bringup.bash']);
+  const pkill = require('child_process').spawnSync('wsl', ['-d', WSL_DISTRO, 'bash', '-c', 'pkill -f gemini_controller; pkill -f rosbridge; pkill -f multi_robot; pkill -f bringup.bash']);
   appendLog('[GUI] Starting bringup.bash (Gemini mode)...');
 
-  const cmd = `echo 1 | bash /home/isaac/catkin_ws/bringup.bash`;
+  const cmd = `echo 1 | bash ${WSL_WS}/bringup.bash`;
 
-  bringupProc = spawn('wsl', ['-d', 'Ubuntu-24.04', 'bash', '-c', cmd], {
+  bringupProc = spawn('wsl', ['-d', WSL_DISTRO, 'bash', '-c', cmd], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
@@ -98,7 +103,7 @@ app.post('/api/stop', (_req, res) => {
   }
 
   appendLog('[GUI] Stopping bringup processes...');
-  spawn('wsl', ['-d', 'Ubuntu-24.04', 'bash', '-c',
+  spawn('wsl', ['-d', WSL_DISTRO, 'bash', '-c',
     'pkill -f gemini_controller.launch.py; pkill -f rosbridge_websocket; pkill -f multi_robot_controller',
   ]);
 

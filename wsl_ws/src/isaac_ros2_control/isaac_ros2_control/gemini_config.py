@@ -8,11 +8,11 @@ def load_env(env_path=None):
     if env_path is None:
         current_file = Path(__file__).resolve()
         candidates = [
-            current_file.parents[4] / "private" / ".env",  # If run from src/
-            current_file.parents[7] / "private" / ".env",  # If run from install/ (wsl_ws/install/pkg/lib/python3.X/site-packages/pkg/)
+            Path(os.environ.get("GEMINI_ROBOTICS_ENV", "/nonexistent")),  # explicit override
+            *[p / "private" / ".env" for p in current_file.parents],  # repo root, wherever it sits
             Path.home() / ".gemini_robotics" / ".env",
+            Path("/mnt/c/Users/SeongMin/Documents/Github/IsaacSim_GeminiRobotics/private/.env"),
             Path("/mnt/d/git/IsaacSim_GeminiRobotics/private/.env"),
-            Path("/mnt/d/git/IsaacSim_Gemini/private/.env"),
         ]
         for c in candidates:
             if c.exists():
@@ -32,10 +32,24 @@ def load_env(env_path=None):
     return config
 
 
+PLACEHOLDERS = {'your_gemini_api_key_here', 'your_api_key_here', 'changeme'}
+
+
+def _real(value):
+    """Treat blank and template placeholder values as unset."""
+    value = (value or '').strip()
+    return '' if value.lower() in PLACEHOLDERS else value
+
+
 def get_api_key(env_path=None):
     """Retrieve the Gemini API key from .env file or environment."""
     config = load_env(env_path)
-    return config.get('LLM_API_KEY', os.environ.get('GEMINI_API_KEY', ''))
+    for source in (config.get('LLM_API_KEY'), config.get('GEMINI_API_KEY'),
+                   os.environ.get('LLM_API_KEY'), os.environ.get('GEMINI_API_KEY')):
+        key = _real(source)
+        if key:
+            return key
+    return ''
 
 
 def get_model_name(env_path=None):

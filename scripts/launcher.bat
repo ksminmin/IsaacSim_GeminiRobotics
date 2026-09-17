@@ -97,7 +97,13 @@ goto menu
 echo.
 echo [1/2] Configuring Environment and FastDDS...
 cd /d "%ISAAC_SIM_RELEASE_PATH%"
+REM ROS_DISTRO must be empty so setup_ros_env.bat adds its bundled ROS 2 libs to PATH
+set "ROS_DISTRO="
 call setup_ros_env.bat
+REM Force Jazzy to match the WSL2 side (6.1 defaults to jazzy, 5.1 to humble)
+set "ROS_DISTRO=jazzy"
+if exist "%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.core\jazzy\lib" set "PATH=%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.core\jazzy\lib;%PATH%"
+if exist "%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.bridge\jazzy\lib" set "PATH=%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.bridge\jazzy\lib;%PATH%"
 if exist "%~dp0setup_fastdds_wsl.py" ( call python.bat "%~dp0setup_fastdds_wsl.py" )
 set "FASTDDS_DEFAULT_PROFILES_FILE=%USERPROFILE%\fastdds_profile.xml"
 set "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"
@@ -119,7 +125,13 @@ goto menu
 echo.
 echo [1/2] Configuring Environment and FastDDS...
 cd /d "%ISAAC_SIM_RELEASE_PATH%"
+REM ROS_DISTRO must be empty so setup_ros_env.bat adds its bundled ROS 2 libs to PATH
+set "ROS_DISTRO="
 call setup_ros_env.bat
+REM Force Jazzy to match the WSL2 side (6.1 defaults to jazzy, 5.1 to humble)
+set "ROS_DISTRO=jazzy"
+if exist "%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.core\jazzy\lib" set "PATH=%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.core\jazzy\lib;%PATH%"
+if exist "%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.bridge\jazzy\lib" set "PATH=%ISAAC_SIM_RELEASE_PATH%\exts\isaacsim.ros2.bridge\jazzy\lib;%PATH%"
 if exist "%~dp0setup_fastdds_wsl.py" ( call python.bat "%~dp0setup_fastdds_wsl.py" )
 set "FASTDDS_DEFAULT_PROFILES_FILE=%USERPROFILE%\fastdds_profile.xml"
 set "RMW_IMPLEMENTATION=rmw_fastrtps_cpp"

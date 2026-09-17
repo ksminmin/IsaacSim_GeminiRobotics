@@ -29,7 +29,7 @@ parser.add_argument("--headless", default=False, action="store_true", help="Run 
 args, _ = parser.parse_known_args()
 
 # Setup config
-CONFIG = {"renderer": "RealTimePathTracing", "headless": args.headless}
+CONFIG = {"renderer": os.environ.get("ISAAC_RENDERER", "RaytracedLighting"), "headless": args.headless}
 simulation_app = SimulationApp(CONFIG)
 
 import carb

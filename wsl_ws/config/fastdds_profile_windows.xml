@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    FastDDS Configuration for Windows (Isaac Sim side)
+    
+    Set this environment variable in PowerShell before launching Isaac Sim:
+      $env:FASTRTPS_DEFAULT_PROFILES_FILE = "<PATH_TO_PROJECT>\config\fastdds_profile_windows.xml"
+    
+    Auto-detected IPs:
+      Windows: 172.23.80.1
+      WSL2:    172.23.82.131
+-->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    
+    <participant profile_name="default_participant" is_default_profile="true">
+        <rtps>
+            <builtin>
+                <discovery_config>
+                    <discoveryProtocol>SIMPLE</discoveryProtocol>
+                    <leaseDuration>
+                        <sec>10</sec>
+                    </leaseDuration>
+                </discovery_config>
+                
+                <initialPeersList>
+                    <!-- WSL2 (where ROS 2 nodes run) -->
+                    <locator>
+                        <udpv4>
+                            <address>172.23.82.131</address>
+                        </udpv4>
+                    </locator>
+                    <!-- Windows (local) -->
+                    <locator>
+                        <udpv4>
+                            <address>172.23.80.1</address>
+                        </udpv4>
+                    </locator>
+                </initialPeersList>
+            </builtin>
+            
+            <useBuiltinTransports>true</useBuiltinTransports>
+        </rtps>
+    </participant>
+    
+</profiles>

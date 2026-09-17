@@ -63,3 +63,4 @@ isaacsim_scripts/moveit.py
 isaacsim_scripts/rtx_lidar.py
 isaacsim_scripts/rtx_radar.py
 isaacsim_scripts/subscriber.py
+*.log
